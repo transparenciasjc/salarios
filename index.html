@@ -19,7 +19,7 @@
     function drawTable() {
       var data = google.visualization.arrayToDataTable(array_salarios);
 
-      var formatter = new google.visualization.TableNumberFormat({
+      var formatter = new google.visualization.NumberFormat({
         prefix: "R$", 
         pattern: 'R$ #,###,###.##', 
         negativeColor: 'red', 
