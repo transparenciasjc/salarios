@@ -20,8 +20,9 @@
       var data = google.visualization.arrayToDataTable(array_salarios);
 
       var formatter = new google.visualization.NumberFormat({
-        prefix: "R$", 
-        pattern: 'R$ #,###,###.##', 
+        prefix: "R$ ", 
+        decimalSymbol: ",",
+        groupingSymbol: ".",
         negativeColor: 'red', 
         negativeParens: true
       });
