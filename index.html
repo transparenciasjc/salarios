@@ -9,31 +9,40 @@
   <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
   <script type='text/javascript' src='https://www.google.com/jsapi'></script>
-  <script type="text/javascript" language="javascript" src="javascripts/array_salarios.js"></script>
+  <script type='text/javascript' src='http://code.jquery.com/jquery-1.10.2.min.js'></script>
+  <script type="text/javascript" language="javascript" src="javascripts/jquery-csv.js"></script>
   <script type='text/javascript'>
     var pageSize = 10;
 
     google.load('visualization', '1', {packages:['table']});
-    google.setOnLoadCallback(drawTable);
+    google.setOnLoadCallback(function() {
+      drawTable($('#month').val());
+    });
 
-    function drawTable() {
-      var data = google.visualization.arrayToDataTable(array_salarios);
+    function drawTable(month) {
+      // month in format YYYYmm
+      // e.g. 201308
+      $.get('data/' + month + '.csv', function(data) {
+        // load CSV to datatable
+        var csv_data = $.csv.toArrays(data, {separator: ';'}),
+            data = google.visualization.arrayToDataTable(csv_data, true);
 
-      var formatter = new google.visualization.NumberFormat({
-        prefix: "R$ ", 
-        decimalSymbol: ",",
-        groupingSymbol: ".",
-        negativeColor: 'red', 
-        negativeParens: true
-      });
+        // set table headers
+        data.setColumnLabel(1, "Cargo");
+        data.setColumnLabel(4, "Salário");
 
-        formatter.format(data, 1); // Apply formatter to second column
+        // format money
+        var formatter = new google.visualization.PatternFormat('R$ {0}');
+        formatter.format(data, [4], 4);
+
+        // make a view with two columns
+        var view = new google.visualization.DataView(data);
+        view.setColumns([1, 4]);
 
         var table = new google.visualization.Table(document.getElementById('salarios_table'));
-        table.draw(data, {showRowNumber: true, page: 'enable', 'pageSize': pageSize});
-        console.log("testes");
-      }
-
+        table.draw(view, {showRowNumber: true, page: 'enable', 'pageSize': pageSize});
+      });
+    }
       function setOption(prop, value) {
         pageSize = value;
         drawTable(value);
@@ -58,6 +67,13 @@
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
         <form action="">
+          Mês:
+          <select id="month" onChange="drawTable(this.value)">
+            <option selected=selected value="201311">Novembro/2013</option>
+            <option value="201310">Outubro/2013</option>
+            <option value="201309">Setembro/2013</option>
+            <option value="201308">Agosto/2013</option>
+          </select>
           Número de linhas exibidas na tabela:
           <select onChange="setOption('pageSize', parseInt(this.value, 10))">
             <option selected=selected value="10">10</option>
@@ -67,7 +83,7 @@
           </select>
         </form>
 
-        Clique na Aba "Cargo" ou "Salários" para organizá-los por ordem alfabética/numérica.
+        Clique na Aba "Cargo" ou "Salário" para organizá-los por ordem alfabética/numérica.
 
         <div id='salarios_table'></div>
       </section>
