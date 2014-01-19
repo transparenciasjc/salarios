@@ -12,16 +12,16 @@
   <script type='text/javascript' src='http://code.jquery.com/jquery-1.10.2.min.js'></script>
   <script type="text/javascript" language="javascript" src="javascripts/jquery-csv.js"></script>
   <script type='text/javascript'>
-    var pageSize = 10;
-
     google.load('visualization', '1', {packages:['table']});
     google.setOnLoadCallback(function() {
-      drawTable($('#month').val());
+      drawTable();
     });
 
-    function drawTable(month) {
+    function drawTable() {
       // month in format YYYYmm
       // e.g. 201308
+      var month = $('#month').val(),
+          pageSize = parseInt($('#pageSize').val());
       $.get('data/' + month + '.csv', function(data) {
         // load CSV to datatable
         var csv_data = $.csv.toArrays(data, {separator: ';'}),
@@ -43,13 +43,7 @@
         table.draw(view, {showRowNumber: true, page: 'enable', 'pageSize': pageSize});
       });
     }
-      function setOption(prop, value) {
-        pageSize = value;
-        drawTable(value);
-      }
     </script>
-
-
     <title>Salarios</title>
   </head>
   <body>
@@ -68,16 +62,16 @@
       <section id="main_content" class="inner">
         <form action="">
           Mês:
-          <select id="month" onChange="drawTable(this.value)">
+          <select id="month" onChange="drawTable()">
             <option selected=selected value="201311">Novembro/2013</option>
             <option value="201310">Outubro/2013</option>
             <option value="201309">Setembro/2013</option>
             <option value="201308">Agosto/2013</option>
           </select>
           Número de linhas exibidas na tabela:
-          <select onChange="setOption('pageSize', parseInt(this.value, 10))">
+          <select id="pageSize" onChange="drawTable()">
             <option selected=selected value="10">10</option>
-            <option value="25">20</option>
+            <option value="25">25</option>
             <option value="50">50</option>
             <option value="100">100</option>
           </select>
