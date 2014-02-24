@@ -17,6 +17,11 @@
       drawTable();
     });
 
+    $.csv.hooks.castToScalarBr = function(value, state) {
+        value = value.replace(/\./g, '').replace(/,/, '.');
+        return $.csv.hooks.castToScalar(value, state);
+    }
+
     function drawTable() {
       // month in format YYYYmm
       // e.g. 201308
@@ -24,7 +29,15 @@
           pageSize = parseInt($('#pageSize').val());
       $.get('data/' + month + '.csv', function(data) {
         // load CSV to datatable
-        var csv_data = $.csv.toArrays(data, {separator: ';'}),
+        var csv_data = $.csv.toArrays(data, {
+                separator: ';',
+                onParseValue: function(value, state) {
+                    if (state.colNum == 5) {
+                        return $.csv.hooks.castToScalarBr(value, state);
+                    }
+                    return value;
+                }
+            }),
             data = google.visualization.arrayToDataTable(csv_data, true);
 
         // set table headers
@@ -32,8 +45,12 @@
         data.setColumnLabel(4, "Salário");
 
         // format money
-        var formatter = new google.visualization.PatternFormat('R$ {0}');
-        formatter.format(data, [4], 4);
+        var formatter = new google.visualization.NumberFormat({
+            prefix: 'R$',
+            decimalSymbol: ',',
+            groupingSymbol: '.'
+        });
+        formatter.format(data, 4);
 
         // make a view with two columns
         var view = new google.visualization.DataView(data);
